@@ -57,8 +57,8 @@ from peft import PromptTuningConfig,PromptTuningInit,get_peft_model,TaskType
 
 # 有初始化提示词(hard prompt)
 config = PromptTuningConfig(
-    task_type=TaskType.CAUSAL_LM,
-    prompt_tuning_init=PromptTuningInit.TEXT,
+    task_type=TaskType.CAUSAL_LM, # 任务类型，这里是因果语言模型,即GPT、Bloom、LLaMA 这种 从左到右生成 的模型类型
+    prompt_tuning_init=PromptTuningInit.TEXT,# 虚拟 token 的初始 embedding 是由一段真实文本生成的
     prompt_tuning_init_text="下面是一段人与机器人的对话，",
     num_virtual_tokens=len(tokenizer("下面是一段人与机器人的对话，")["input_ids"]),
     tokenizer_name_or_path="Langboat/bloom-1b4-zh"
@@ -99,3 +99,18 @@ trainer = Trainer(
 # step7 训练模型
 trainer.train()
 
+# step8 模型推理
+print(model.device)
+
+ipt = tokenizer(
+    prompt="Human: {}\n\nAssistant: ".format("如何提高学习效率？", "").strip(),
+    return_tensors="pt" # 返回的张量类型为pt，即pytorch张量
+).to(model.device)
+
+# 把model输出的response结果再次转为文本
+print(
+    tokenizer.decode(
+        model.generate(**ipt, max_length=256, do_sample=True)[0],
+        skip_special_tokens=True
+    )
+)
