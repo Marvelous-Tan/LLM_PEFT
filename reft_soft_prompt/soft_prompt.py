@@ -101,6 +101,8 @@ trainer.train()
 
 # step8 模型推理
 print(model.device)
+# 如果目前占用的资源是cpu，可以切换到gpu上
+model = model.cuda()
 
 ipt = tokenizer(
     prompt="Human: {}\n\nAssistant: ".format("如何提高学习效率？", "").strip(),
